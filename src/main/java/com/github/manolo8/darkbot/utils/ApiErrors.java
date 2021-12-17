@@ -25,7 +25,7 @@ public class ApiErrors {
             return "You're using a <strong>removed API</strong>, use the recommended API!";
         if (api == BrowserApi.NO_OP_API)
             return "Error loading the no-op api, how did this happen?";
-        if (api != BrowserApi.DARK_BOAT)
+        if (api != BrowserApi.TANOS_API)
             return "You're using an <strong>unsupported API</strong>, use the recommended API!";
 
         String bits = System.getProperty("sun.arch.data.model");

@@ -7,11 +7,13 @@ import com.github.manolo8.darkbot.core.api.DarkBoatHookAdapter;
 import com.github.manolo8.darkbot.core.api.DarkCefAdapter;
 import com.github.manolo8.darkbot.core.api.DarkMemAdapter;
 import com.github.manolo8.darkbot.core.api.NoopAPIAdapter;
+import com.github.manolo8.darkbot.core.api.TanosAdapter;
 import eu.darkbot.api.config.annotations.Configuration;
 
 
 @Configuration("browser_api")
 public enum BrowserApi {
+    TANOS_API(TanosAdapter.class),
     DARK_BOAT(DarkBoatAdapter.class),
     DARK_BOAT_HOOK(DarkBoatHookAdapter.class),
     BACKPAGE_ONLY(BackpageAdapter.class),

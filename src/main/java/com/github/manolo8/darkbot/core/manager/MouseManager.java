@@ -1,6 +1,7 @@
 package com.github.manolo8.darkbot.core.manager;
 
 import com.github.manolo8.darkbot.Main;
+import com.github.manolo8.darkbot.core.entities.Box;
 import com.github.manolo8.darkbot.core.objects.Point;
 import com.github.manolo8.darkbot.core.utils.ClickPoint;
 import com.github.manolo8.darkbot.core.utils.Location;

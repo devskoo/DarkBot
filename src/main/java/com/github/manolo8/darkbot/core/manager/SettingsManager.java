@@ -19,6 +19,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
     public int force2d;
     public int nextMap;
     public int currMap;
+    public int gpuSupport;
 
     public String lang;
 
@@ -39,6 +40,7 @@ public class SettingsManager implements Manager, Tickable, API.Singleton {
         this.currMap = API.readMemoryInt(address + 248);
 
         this.force2d = API.readMemoryInt(address, 784, 0x20);
+        this.gpuSupport = API.readMemoryInt(address, 0x14c);
 
         this.lang = API.readMemoryStringFallback(address, null, 640);
 

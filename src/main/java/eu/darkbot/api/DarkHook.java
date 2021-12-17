@@ -34,6 +34,7 @@ public class DarkHook implements NativeTaskRunner, NativeCallbackManager, API.Si
 
     /* Native */
     private native void onLoad();
+    private native int getVersion();
 
     public native int getVersion();
     public native void setMaxCps(int maxCps);

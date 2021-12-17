@@ -52,7 +52,7 @@ public class ObjArray extends SwfPtrCollection {
     }
 
     public static ObjArray ofSprite(boolean autoUpdatable) {
-        return new ObjArray(0x18, 0x8, 0x8, autoUpdatable);
+        return new ObjArray(0x020, 0x10, 0x8, autoUpdatable);
     }
 
     /**
@@ -105,6 +105,6 @@ public class ObjArray extends SwfPtrCollection {
     }
 
     private boolean isSprite() {
-        return this.sizeOffset == 0x18;
+        return this.sizeOffset == 0x20;
     }
 }
