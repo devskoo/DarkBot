@@ -1,30 +1,28 @@
 package com.github.manolo8.darkbot.core.api;
 
 import com.github.manolo8.darkbot.Main;
-import com.github.manolo8.darkbot.core.manager.HeroManager;
+import com.github.manolo8.darkbot.core.BotInstaller;
 import com.github.manolo8.darkbot.core.manager.MapManager;
 import com.github.manolo8.darkbot.core.utils.ByteUtils;
 import com.github.manolo8.darkbot.utils.StartupParams;
-import eu.darkbot.api.DarkBoat;
 import eu.darkbot.api.DarkTanos;
 import eu.darkbot.api.game.other.Locatable;
 import eu.darkbot.api.managers.OreAPI;
-
-import java.util.function.BooleanSupplier;
 
 import static com.github.manolo8.darkbot.Main.API;
 
 public class TanosAdapter extends GameAPIImpl<DarkTanos,
         DarkTanos,
         DarkTanos,
-        ByteUtils.StringReader,
+        ByteUtils.ExtraMemoryReader,
         DarkTanos,
         TanosAdapter.DirectInteractionManager> {
 
     private final MapManager mapManager;
 
-    public TanosAdapter(StartupParams params, DirectInteractionManager di, DarkTanos tanos, MapManager mapManager) {
-        super(params, tanos, tanos, tanos, new ByteUtils.StringReader(tanos), tanos, di,
+    public TanosAdapter(StartupParams params, DirectInteractionManager di, DarkTanos tanos,
+                        BotInstaller botInstaller, MapManager mapManager) {
+        super(params, tanos, tanos, tanos, new ByteUtils.ExtraMemoryReader(tanos, botInstaller), tanos, di,
                 GameAPI.Capability.LOGIN,
                 GameAPI.Capability.INITIALLY_SHOWN,
                 GameAPI.Capability.CREATE_WINDOW_THREAD,
