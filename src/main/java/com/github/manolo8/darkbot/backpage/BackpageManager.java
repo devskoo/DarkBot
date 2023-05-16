@@ -2,7 +2,9 @@ package com.github.manolo8.darkbot.backpage;
 
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.core.api.GameAPI;
+import com.github.manolo8.darkbot.extensions.features.FeatureDefinition;
 import com.github.manolo8.darkbot.extensions.plugins.IssueHandler;
+import com.github.manolo8.darkbot.extensions.plugins.PluginIssue;
 import com.github.manolo8.darkbot.utils.Time;
 import com.github.manolo8.darkbot.utils.http.Http;
 import com.github.manolo8.darkbot.utils.http.Method;
@@ -57,7 +59,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
     protected long lastRequest;
     protected long sidLastUpdate = System.currentTimeMillis();
     protected long sidNextUpdate = sidLastUpdate;
-    protected Timer refreshTimer = Timer.get(30_000L);
+    protected Timer refreshTimer = Timer.get(300_000L);
 
     protected long checkDrones = Long.MAX_VALUE;
     protected int sidStatus = -1;
@@ -96,7 +98,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                     }
                 }
             }
@@ -145,7 +147,7 @@ public class BackpageManager extends Thread implements BackpageAPI {
                     } catch (Throwable e) {
                         main.featureRegistry.getFeatureDefinition(task)
                                 .getIssues()
-                                .addWarning("bot.issue.feature.failed_to_tick", IssueHandler.createDescription(e));
+                                .handleTickFeatureException(PluginIssue.Level.WARNING, e);
                     }
                 }
             }

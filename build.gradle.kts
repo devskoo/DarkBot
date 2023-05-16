@@ -24,7 +24,7 @@ repositories {
 }
 
 group = "eu.darkbot"
-version = "1.118"
+version = "1.120"
 description = "DarkBot"
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
@@ -43,7 +43,7 @@ publishing {
 }
 
 dependencies {
-    val apiVersion = "0.7.0"
+    val apiVersion = "0.7.1"
 
     // use this if you want to use local(mavenLocal) darkbot API
     //api("eu.darkbot", "darkbot-impl", apiVersion)
@@ -62,6 +62,7 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> { options.encoding = "UTF-8" }
+tasks.withType<JavaExec> { systemProperty("file.encoding", "UTF-8") }
 
 tasks.wrapper {
     gradleVersion = "7.5.1"
@@ -105,7 +106,7 @@ launch4j {
     jarTask = project.tasks["proguard"]
     icon = "$projectDir/icon.ico"
 
-    maxHeapSize = 256
+    maxHeapSize = 512
     version = project.version.toString()
 
     jreRuntimeBits = "64/32" // will prioritize 64bit jre/jdk

@@ -5,15 +5,15 @@ import com.github.manolo8.darkbot.backpage.dispatch.DispatchData;
 import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.backpage.dispatch.InProgress;
 import com.github.manolo8.darkbot.backpage.dispatch.Retriever;
-import com.github.manolo8.darkbot.backpage.dispatch.Gate;
 import com.github.manolo8.darkbot.utils.CaptchaHandler;
-import com.github.manolo8.darkbot.utils.http.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.util.IOUtils;
 import org.intellij.lang.annotations.Language;
 
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class DispatchManager {
         this.collected = new HashMap<>();
         this.lastCollected = new HashMap<>();
         this.gson = backpageManager.getGson();
-        this.captchaHandler = new CaptchaHandler(backpageManager,configAPI,
+        this.captchaHandler = new CaptchaHandler(backpageManager, configAPI,
                 "indexInternal.es?action=internalDispatch", "dispatch");
     }
 
@@ -49,19 +49,25 @@ public class DispatchManager {
     }
 
     @Deprecated
-    public boolean update(int expiryTime) {
+    public Boolean update(int expiryTime) {
         return this.update((long) expiryTime);
     }
 
-    public boolean update(long expiryTime) {
+    /**
+     * @param expiryTime only update if within
+     * @return null if update wasn't required (non-expired), true if updated ok, false if update failed
+     */
+    public Boolean update(long expiryTime) {
         try {
-            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return false;
+            if (System.currentTimeMillis() <= lastDispatcherUpdate + expiryTime) return null;
             if (captchaHandler.isSolvingCaptcha()) return false;
-            String page = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getContent();
-            if (captchaHandler.needsCaptchaSolve(page)) {
-                return captchaHandler.solveCaptcha();
+            HttpURLConnection httpURLConnection = backpageManager.getHttp("indexInternal.es?action=internalDispatch").getConnection();
+            String page = IOUtils.read(httpURLConnection.getInputStream());
+            if (captchaHandler.needsCaptchaSolve(httpURLConnection.getURL(), page)) {
+                System.out.println("DispatchManager: Captcha Detected");
+                captchaHandler.solveCaptcha();
+                return false;
             }
-
             lastDispatcherUpdate = System.currentTimeMillis();
             return InfoReader.updateAll(page, data);
         } catch (Exception e) {
@@ -202,7 +208,7 @@ public class DispatchManager {
                 this.lastCollected.compute(key, (k, v) -> (v == null ? 0 : v) + amount);
             }
         }
-        System.out.println(type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
+        System.out.println("DispatchManager: " + type + " (" + id + ") " + (failed ? "failed" : "succeeded") + ": " + (failed ? response : ""));
         update(0);
         return !failed;
     }
@@ -215,6 +221,7 @@ public class DispatchManager {
 
     private enum InfoReader {
         PERMIT("name=\"permit\" value=\"([0-9]+)\"", DispatchData::setPermit),
+        PERMIT_PLUS("name=\"permit plus\" value=\"([0-9]+)\"", DispatchData::setPermitPlus),
         GATE_UNIT("name=\"ggeu\" value=\"([0-9]+)\"", DispatchData::setGateUnits),
         SLOTS(":([0-9]+).*class=\"userCurrentMax\">([0-9]+)", DispatchData::setAvailableSlots, DispatchData::setMaxSlots),
         PRIME_COUPON("name=\"quickcoupon\" value=\"([0-9]+)\"", DispatchData::setPrimeCoupons),
