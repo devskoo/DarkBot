@@ -138,7 +138,9 @@ public class StarManager implements API.Singleton {
                 .addGG(453, "GoP Easy 4", "GoP E").accessOnlyBy(235, "GoP Easy 3")
                 .addGG(454, "GoP Easy 5", "GoP E").accessOnlyBy(235, "GoP Easy 4")
                 .addGG(455, "GoP Easy Final", "GoP E").accessOnlyBy(235, "GoP Easy 5").exitBy(1)
-                .addGG(470, "Plutus' Trove of Riches Easy", "PToR E").accessOnlyBy(235, "GoP Easy Final").exitBy(1);
+                .addGG(470, "Plutus' Trove of Riches Easy", "PToR E").accessOnlyBy(235, "GoP Easy Final").exitBy(1)
+                .addGG(471, "Treacherous Domain Easy", "TD E").accessOnlyBy(238, HOME_MAPS)
+                .addGG(472, "Treacherous Domain Normal", "TD N").accessOnlyBy(238, OUTPOST_HOME_MAPS);
                 // Special (No direct access)
         mapBuild.addMap(42, "???")
                 .addMap(61, "MMO Invasion", "MMO Inv").addMap(62, "EIC Invasion", "EIC Inv").addMap(63, "VRU Invasion", "VRU Inv")
@@ -282,8 +284,7 @@ public class StarManager implements API.Singleton {
 
     public List<Integer> getAccessibleMapIds() {
         return starSystem.vertexSet().stream()
-                .filter(m -> !m.gg && m.id > 0)
-                .filter(m -> starSystem.inDegreeOf(m) > 0)
+                .filter(m -> !m.gg && isAccessible(m))
                 .sorted(Comparator.comparing(map -> map.name))
                 .map(m -> m.id).collect(Collectors.toList());
     }
@@ -295,6 +296,10 @@ public class StarManager implements API.Singleton {
                         (starSystem.outDegreeOf(m) == 0 || starSystem.containsEdge(m, m)))
                 .map(m -> m.name)
                 .sorted().collect(Collectors.toList());
+    }
+
+    public boolean isAccessible(Map map) {
+        return map.id > 0 && starSystem.inDegreeOf(map) > 0;
     }
 
     public static Collection<Map> getAllMaps() {
