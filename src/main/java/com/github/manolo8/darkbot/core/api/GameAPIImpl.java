@@ -31,7 +31,6 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 
 import static com.github.manolo8.darkbot.Main.API;
@@ -60,7 +59,6 @@ public class GameAPIImpl<
     protected final String version;
 
     private final ConfigAPI config;
-    private final Consumer<Integer> fpsLimitListener; // Needs to be kept as a strong reference to avoid GC
 
     protected final LoginData loginData; // Used only if api supports LOGIN
     protected int pid; // Used only if api supports ATTACH
@@ -104,14 +102,6 @@ public class GameAPIImpl<
 
         this.initiallyShown = hasCapability(Capability.INITIALLY_SHOWN) && !params.getAutoHide();
         this.mapManager = main.mapManager;
-
-        if (hasCapability(Capability.DIRECT_LIMIT_FPS)) {
-            ConfigSetting<Integer> maxFps = config.requireConfig("bot_settings.api_config.max_fps");
-            maxFps.addListener(fpsLimitListener = this::setMaxFps);
-            setMaxFps(maxFps.getValue());
-        } else {
-            this.fpsLimitListener = null;
-        }
 
         if (hasCapability(Capability.PROXY)) {
             ConfigSetting<Boolean> useProxy = config.requireConfig("bot_settings.api_config.use_proxy");
@@ -351,7 +341,9 @@ public class GameAPIImpl<
     @Override
     public byte[] readMemory(long address, int length) {
         if (!ByteUtils.isValidPtr(address)) return new byte[0];
-        return memory.readBytes(address, length);
+        synchronized (memory) {
+            return memory.readBytes(address, length);
+        }
     }
 
     @Override
@@ -360,7 +352,9 @@ public class GameAPIImpl<
             Arrays.fill(buffer, 0, length, (byte) 0);
             return;
         }
-        memory.readBytes(address, buffer, length);
+        synchronized (memory) {
+            memory.readBytes(address, buffer, length);
+        }
     }
 
     @Override
@@ -446,7 +440,7 @@ public class GameAPIImpl<
     }
 
     @Override
-    public void handleRefresh() {
+    public void handleRefresh(boolean useFakeDailyLogin) {
         // No login has happened? Make a first attempt
         if (hasCapability(Capability.LOGIN) && loginData.getUrl() == null) {
             handleRelogin();
@@ -454,9 +448,12 @@ public class GameAPIImpl<
 
         setData(); //always set data to update possible settings changes
         refreshCount++;
-        handler.reload();
-
+        reload(useFakeDailyLogin);
         extraMemoryReader.resetCache();
+    }
+
+    protected void reload(boolean useFakeDailyLogin) {
+        handler.reload();
     }
 
     @Override
@@ -612,5 +609,13 @@ public class GameAPIImpl<
     @Override
     public long lastInternetReadTime() {
         return handler.lastInternetReadTime();
+    }
+
+    @Override
+    public String readStringDirect(long address) {
+        if (!ByteUtils.isValidPtr(address)) return FALLBACK_STRING;
+        String s = ByteUtils.readStringDirect(address);
+
+        return s == null ? FALLBACK_STRING : s;
     }
 }
